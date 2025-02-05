@@ -1,91 +1,126 @@
 import asyncio
+import time
 import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
+import fitz  # PyMuPDF for PDF Processing
 from groq import AsyncGroq
 
-# Hardcoded API Key
-GROQ_API_KEY = "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"
+# Hardcoded API Key (REPLACE WITH YOUR ACTUAL KEY)
+GROQ_API_KEY = "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"  # <--- IMPORTANT: Replace this!
+
+# Predefined Response for Creator Questions
+CREATOR_QUESTIONS = [
+    "Who made you?", "Who are you?", "Who created you?", 
+    "Which company or organization developed you?", "Where were you trained and developed?", 
+    "What is your origin or development history?", "Who developed you","Are you an open-source or proprietary model?",
+    "Which research lab or AI team built you?", "What is the name of the company that owns you?",
+    "Are you based on any publicly available AI models?", "Where is your parent company headquartered?",
+    "What language models were you trained on, and who provided them?","who made you", "who are you", "who created you", 
+    "who developed you", "who trained you","who is your parent company", "who is your owner", 
+    "who is your creator", "who is your developer", "who is your manufacturer", "who is your inventor", 
+    "who is your designer", "who is your builder", "who is your founder", "who is your maker", "what is your origin", 
+    "what is your source", "who is your master", "who is your boss", "who is your supervisor", "who is your manager",
+    "who is your leader", "who is your head", "who is your chief", "which company or organization developed you",
+    "where were you trained and developed", "what is your origin or development history",
+    "are you an open-source or proprietary model", "which research lab or ai team built you",
+    "what is the name of the company that owns you", "are you based on any publicly available ai models",
+    "where is your parent company headquartered", "what language models were you trained on, and who provided them",
+    "who is Tejas Jagdale","Who is Tejas Jagdale","Who is Tejas Jagdale?","who is Tejas Jagdale?"
+]
+
+CREATOR_RESPONSE = (
+    "I was developed by Meta AI and fine-tuned by **Tejas Jagdale**, AI Engineer based in Pune.\n\n"
+    "LinkedIn Profile: [Tejas Jagdale](https://www.linkedin.com/in/jagdaletejas/)"
+)
 
 async def get_response(messages):
-    client = AsyncGroq(api_key=GROQ_API_KEY)  # Pass API key directly
+    client = AsyncGroq(api_key=GROQ_API_KEY)
+    try:
+        chat_completion = await client.chat.completions.create(
+            messages=messages,
+            model="llama-3.3-70b-versatile",
+            temperature=0.5,
+            max_completion_tokens=1024,
+            top_p=1,
+            stop=None,
+            stream=False,
+        )
+        return chat_completion.choices[0].message.content
+    except Exception as e:
+        st.error(f"Error getting response: {e}")
+        return "An error occurred. Please try again later."
 
-    chat_completion = await client.chat.completions.create(
-        messages=messages,  # Send full chat history
-        model="llama-3.3-70b-versatile",
-        temperature=0.5,
-        max_completion_tokens=1024,
-        top_p=1,
-        stop=None,
-        stream=False,
-    )
+def extract_text_from_pdf(pdf_file):
+    try:
+        doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
+        text = "\n".join([page.get_text() for page in doc])
+        return text[:5000]
+    except Exception as e:
+        st.error(f"Error extracting text from PDF: {e}")
+        return ""
 
-    return chat_completion.choices[0].message.content
-
-# Streamlit UI
 st.title("Chat with Tejas.ai 🤖")
-st.write("Have a continuous conversation with AI!")
+st.write("Say it Simply!!")
 
-# Initialize session state for chat history
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "system", "content": "You are a helpful assistant."}
-    ]
+    st.session_state.messages = []
+if "current_messages" not in st.session_state:
+    st.session_state.current_messages = [{"role": "system", "content": "You are a helpful assistant."}]
+if "needs_animation" not in st.session_state:
+    st.session_state.needs_animation = False
+if "latest_response" not in st.session_state:
+    st.session_state.latest_response = None
 
-# Initialize session state for storing questions separately
-if "questions" not in st.session_state:
-    st.session_state.questions = []
+st.sidebar.header("📄 Upload a PDF")
+uploaded_pdf = st.sidebar.file_uploader("Upload PDF", type=["pdf"])
 
-# Display chat history
-for msg in st.session_state.messages[1:]:  # Skip system message
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
+if uploaded_pdf:
+    extracted_text = extract_text_from_pdf(uploaded_pdf)
+    if extracted_text:
+        st.sidebar.write("✅ PDF Loaded Successfully!")
+        st.session_state.current_messages.append({"role": "user", "content": f"Context from uploaded PDF: {extracted_text}"})
 
-# User input
+# Display chat history and handle animation
+for i in range(len(st.session_state.messages)):
+    with st.chat_message(st.session_state.messages[i]["role"]):
+        st.write(st.session_state.messages[i]["content"])
+
+if st.session_state.needs_animation and st.session_state.latest_response:
+    with st.chat_message("assistant"):
+        response_placeholder = st.empty()
+        animated_response = ""
+        for char in st.session_state.latest_response:
+            animated_response += char
+            response_placeholder.markdown(f"**Tejas.ai:** {animated_response} ▌")
+            time.sleep(0.003)
+        response_placeholder.markdown(f"**Tejas.ai:** {st.session_state.latest_response}")
+    st.session_state.messages.append({"role": "assistant", "content": f"**Tejas.ai:** {st.session_state.latest_response}"})
+    st.session_state.needs_animation = False
+    st.session_state.latest_response = None
+
 user_input = st.chat_input("Type your message...")
 
 if user_input:
-    # Append user question to a separate list
-    st.session_state.questions.append(user_input)
-
-    # Append user message
-    st.session_state.messages.append({"role": "user", "content": user_input})
+    st.session_state.messages.append({"role": "user", "content": f"**You:** {user_input}"})
     
-    # Show loading animation
-    with st.spinner("dakutejas.ai 🤔"):
-        response = asyncio.run(get_response(st.session_state.messages))
+    if user_input.strip().lower() in [q.lower() for q in CREATOR_QUESTIONS]:
+        response = CREATOR_RESPONSE
+    else:
+        st.session_state.current_messages.append({"role": "user", "content": user_input})
+        with st.spinner("Tejas.ai 💭 Thinking..."):
+            response = asyncio.run(get_response(st.session_state.current_messages))
+        st.session_state.current_messages.append({"role": "assistant", "content": response})
+    
+    st.session_state.needs_animation = True
+    st.session_state.latest_response = response
+    st.rerun()
 
-    # Append AI response
-    st.session_state.messages.append({"role": "assistant", "content": response})
-
-    # Display AI response
-    with st.chat_message("assistant"):
-        st.write(response)
-
-# Sidebar for additional features
 st.sidebar.header("📌 Stored Questions")
-for q in st.session_state.questions:
-    st.sidebar.write(f"- {q}")
+for msg in st.session_state.messages:
+    if msg["role"] == "user":
+        st.sidebar.write(f"- {msg['content'].replace('**You:** ', '')}")
 
-# 🔽 Download Questions as TXT
-if st.sidebar.button("Download Questions (TXT)"):
-    questions_text = "\n".join(st.session_state.questions)
-    st.sidebar.download_button("📥 Download TXT", questions_text, "questions.txt", "text/plain")
+if st.sidebar.button("Download Chat (TXT)"):
+    chat_text = "\n\n".join([msg["content"] for msg in st.session_state.messages])
+    st.sidebar.download_button("📥 Download TXT", chat_text, "chat_history.txt", "text/plain")
 
-# 🔽 Download Questions as CSV
-if st.sidebar.button("Download Questions (CSV)"):
-    questions_df = pd.DataFrame({"Questions": st.session_state.questions})
-    csv_data = questions_df.to_csv(index=False).encode("utf-8")
-    st.sidebar.download_button("📥 Download CSV", csv_data, "questions.csv", "text/csv")
-
-# 📊 Generate a Chart (Message Count per Role)
-if st.sidebar.button("Generate Chat Stats 📈"):
-    roles = [msg["role"] for msg in st.session_state.messages if msg["role"] != "system"]
-    role_counts = pd.Series(roles).value_counts()
-
-    fig, ax = plt.subplots()
-    role_counts.plot(kind="bar", color=["blue", "green"], ax=ax)
-    ax.set_xlabel("Role")
-    ax.set_ylabel("Message Count")
-    ax.set_title("Chat Messages Breakdown")
-    st.sidebar.pyplot(fig)
+st.sidebar.info("Developed and Fine-Tuned by **Tejas Jagdale**. Connect on [LinkedIn](https://www.linkedin.com/in/jagdaletejas/).")
