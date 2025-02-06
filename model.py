@@ -75,7 +75,7 @@ if st.session_state.needs_animation and st.session_state.latest_response:
         for char in st.session_state.latest_response:
             animated_response += char
             response_placeholder.markdown(f"**Tejas.ai:** {animated_response} ▌")
-            time.sleep(0.02)  # Adjust speed for smooth animation
+            time.sleep(0.005)  # Adjust speed for smooth animation
         response_placeholder.markdown(f"**Tejas.ai:** {st.session_state.latest_response}")
 
     st.session_state.messages.append(
@@ -111,4 +111,4 @@ if st.sidebar.button("Download Chat (TXT)"):
     chat_text = "\n\n".join([msg["content"] for msg in st.session_state.messages])
     st.sidebar.download_button("📥 Download TXT", chat_text, "chat_history.txt", "text/plain")
 
-st.sidebar.info("Developed and Fine-Tuned by **Tejas Jagdale**. Connect on https://www.linkedin.com/in/jagdaletejas/.")
+st.sidebar.info("Developed and Fine-Tuned by **Tejas Jagdale**. Connect on [LinkedIn](https://www.linkedin.com/in/jagdaletejas/).")
