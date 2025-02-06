@@ -1,10 +1,9 @@
-fitz
+
 streamlit
-matplotlib
+
 numpy
 pandas
 groq
 asyncio
 frontend
-pymupdf
 
