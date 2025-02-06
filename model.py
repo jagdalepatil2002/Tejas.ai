@@ -51,6 +51,7 @@ async def get_response(messages):
 st.title("Chat with Tejas.ai 🤖")
 st.write("Say it Simply!!")
 
+# Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "current_messages" not in st.session_state:
@@ -60,11 +61,14 @@ if "needs_animation" not in st.session_state:
 if "latest_response" not in st.session_state:
     st.session_state.latest_response = None
 
-# Display chat history and handle animation
-for i in range(len(st.session_state.messages)):
-    with st.chat_message(st.session_state.messages[i]["role"]):
-        st.write(st.session_state.messages[i]["content"])
+# Display chat history with auto-scroll
+chat_placeholder = st.empty()
+with chat_placeholder.container():
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
 
+# Auto-scrolling animation
 if st.session_state.needs_animation and st.session_state.latest_response:
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
@@ -72,11 +76,14 @@ if st.session_state.needs_animation and st.session_state.latest_response:
         for char in st.session_state.latest_response:
             animated_response += char
             response_placeholder.markdown(f"**Tejas.ai:** {animated_response} ▌")
-            time.sleep(0.003)
+            time.sleep(0.01)  # Adjust speed for smoother animation
+            chat_placeholder.rerun()  # Force UI update to auto-scroll
         response_placeholder.markdown(f"**Tejas.ai:** {st.session_state.latest_response}")
+    
     st.session_state.messages.append({"role": "assistant", "content": f"**Tejas.ai:** {st.session_state.latest_response}"})
     st.session_state.needs_animation = False
     st.session_state.latest_response = None
+    chat_placeholder.rerun()  # Final scroll adjustment
 
 user_input = st.chat_input("Type your message...")
 
