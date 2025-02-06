@@ -1,9 +1,8 @@
 import asyncio
 import time
 import streamlit as st
-import fitz  # PyMuPDF for PDF Processing
 from groq import AsyncGroq
-import tools
+
 # Hardcoded API Key (REPLACE WITH YOUR ACTUAL KEY)
 GROQ_API_KEY = "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"  # <--- IMPORTANT: Replace this!
 
@@ -49,15 +48,6 @@ async def get_response(messages):
         st.error(f"Error getting response: {e}")
         return "An error occurred. Please try again later."
 
-def extract_text_from_pdf(pdf_file):
-    try:
-        doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
-        text = "\n".join([page.get_text() for page in doc])
-        return text[:5000]
-    except Exception as e:
-        st.error(f"Error extracting text from PDF: {e}")
-        return ""
-
 st.title("Chat with Tejas.ai 🤖")
 st.write("Say it Simply!!")
 
@@ -69,15 +59,6 @@ if "needs_animation" not in st.session_state:
     st.session_state.needs_animation = False
 if "latest_response" not in st.session_state:
     st.session_state.latest_response = None
-
-st.sidebar.header("📄 Upload a PDF")
-uploaded_pdf = st.sidebar.file_uploader("Upload PDF", type=["pdf"])
-
-if uploaded_pdf:
-    extracted_text = extract_text_from_pdf(uploaded_pdf)
-    if extracted_text:
-        st.sidebar.write("✅ PDF Loaded Successfully!")
-        st.session_state.current_messages.append({"role": "user", "content": f"Context from uploaded PDF: {extracted_text}"})
 
 # Display chat history and handle animation
 for i in range(len(st.session_state.messages)):
