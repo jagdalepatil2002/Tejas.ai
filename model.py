@@ -3,6 +3,7 @@ import time
 import streamlit as st
 import fitz  # PyMuPDF for PDF Processing
 from groq import AsyncGroq
+import PyMuPDF
 
 # Hardcoded API Key (REPLACE WITH YOUR ACTUAL KEY)
 GROQ_API_KEY = "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"  # <--- IMPORTANT: Replace this!
