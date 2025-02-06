@@ -68,7 +68,6 @@ with chat_placeholder.container():
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-# Auto-scrolling animation
 if st.session_state.needs_animation and st.session_state.latest_response:
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
@@ -76,14 +75,15 @@ if st.session_state.needs_animation and st.session_state.latest_response:
         for char in st.session_state.latest_response:
             animated_response += char
             response_placeholder.markdown(f"**Tejas.ai:** {animated_response} ▌")
-            time.sleep(0.01)  # Adjust speed for smoother animation
-            chat_placeholder.rerun()  # Force UI update to auto-scroll
+            time.sleep(0.02)  # Adjust speed for smooth animation
         response_placeholder.markdown(f"**Tejas.ai:** {st.session_state.latest_response}")
-    
-    st.session_state.messages.append({"role": "assistant", "content": f"**Tejas.ai:** {st.session_state.latest_response}"})
+
+    st.session_state.messages.append(
+        {"role": "assistant", "content": f"**Tejas.ai:** {st.session_state.latest_response}"}
+    )
     st.session_state.needs_animation = False
     st.session_state.latest_response = None
-    chat_placeholder.rerun()  # Final scroll adjustment
+    st.rerun()  # Ensures UI refresh and auto-scroll
 
 user_input = st.chat_input("Type your message...")
 
