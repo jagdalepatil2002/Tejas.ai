@@ -2,7 +2,6 @@ import asyncio
 import time
 import streamlit as st
 from groq import AsyncGroq
-from streamlit.components.v1 import html
 
 # Hardcoded API Key (REPLACE WITH YOUR ACTUAL KEY)
 GROQ_API_KEY = "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"  # <--- IMPORTANT: Replace this!
@@ -28,21 +27,9 @@ CREATOR_QUESTIONS = [
 ]
 
 CREATOR_RESPONSE = (
-    "I was developed by Meta AI and fine-tuned by **Tejas Jagdale**, AI Engineer based in Pune.\n\n"
-    "LinkedIn Profile: [Tejas Jagdale](https://www.linkedin.com/in/jagdaletejas/)"
+    "I was developed by Meta AI and fine-tuned by *Tejas Jagdale*, AI Engineer based in Pune.\n\n"
+    "LinkedIn Profile: https://www.linkedin.com/in/jagdaletejas/"
 )
-
-# Add JavaScript for auto-scrolling
-def auto_scroll():
-    scroll_js = """
-    <script>
-    function scroll() {
-        window.scrollTo(0, document.body.scrollHeight);
-    }
-    scroll();
-    </script>
-    """
-    html(scroll_js)
 
 async def get_response(messages):
     client = AsyncGroq(api_key=GROQ_API_KEY)
@@ -86,8 +73,6 @@ if st.session_state.needs_animation and st.session_state.latest_response:
             animated_response += char
             response_placeholder.markdown(f"**Tejas.ai:** {animated_response} ▌")
             time.sleep(0.003)
-            # Add auto-scroll after each character
-            auto_scroll()
         response_placeholder.markdown(f"**Tejas.ai:** {st.session_state.latest_response}")
     st.session_state.messages.append({"role": "assistant", "content": f"**Tejas.ai:** {st.session_state.latest_response}"})
     st.session_state.needs_animation = False
@@ -108,7 +93,6 @@ if user_input:
     
     st.session_state.needs_animation = True
     st.session_state.latest_response = response
-    auto_scroll()  # Add auto-scroll after new message
     st.rerun()
 
 st.sidebar.header("📌 Stored Questions")
@@ -120,4 +104,4 @@ if st.sidebar.button("Download Chat (TXT)"):
     chat_text = "\n\n".join([msg["content"] for msg in st.session_state.messages])
     st.sidebar.download_button("📥 Download TXT", chat_text, "chat_history.txt", "text/plain")
 
-st.sidebar.info("Developed and Fine-Tuned by **Tejas Jagdale**. Connect on [LinkedIn](https://www.linkedin.com/in/jagdaletejas/).")
+st.sidebar.info("Developed and Fine-Tuned by *Tejas Jagdale*. Connect on https://www.linkedin.com/in/jagdaletejas/.")
