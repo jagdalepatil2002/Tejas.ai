@@ -4,7 +4,7 @@ import streamlit as st
 from groq import AsyncGroq
 
 # Hardcoded API Key (REPLACE WITH YOUR ACTUAL KEY)
-GROQ_API_KEY = "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"  # <--- IMPORTANT: Replace this!
+GROQ_API_KEY = "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"  # <--- IMPORTANT: Replace this!
 
 # Predefined Response for Creator Questions
 CREATOR_QUESTIONS = [
@@ -111,4 +111,4 @@ if st.sidebar.button("Download Chat (TXT)"):
     chat_text = "\n\n".join([msg["content"] for msg in st.session_state.messages])
     st.sidebar.download_button("📥 Download TXT", chat_text, "chat_history.txt", "text/plain")
 
-st.sidebar.info("Developed and Fine-Tuned by **Tejas Jagdale**. Connect on [LinkedIn](https://www.linkedin.com/in/jagdaletejas/).")
+st.sidebar.info("Developed and Fine-Tuned by **Meta & Tejas Jagdale**. Connect on [LinkedIn](https://www.linkedin.com/in/jagdaletejas/).")
