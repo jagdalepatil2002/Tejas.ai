@@ -111,4 +111,4 @@ if st.sidebar.button("Download Chat (TXT)"):
     chat_text = "\n\n".join([msg["content"] for msg in st.session_state.messages])
     st.sidebar.download_button("📥 Download TXT", chat_text, "chat_history.txt", "text/plain")
 
-st.sidebar.info("Developed and Fine-Tuned by **Meta & Tejas Jagdale**. Connect on [LinkedIn](https://www.linkedin.com/in/jagdaletejas/).")
+st.sidebar.info("Developed and Fine-Tuned by **Tejas Jagdale**. Connect on [LinkedIn](https://www.linkedin.com/in/jagdaletejas/).")
