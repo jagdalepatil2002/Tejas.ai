@@ -7,3 +7,6 @@ groq
 asyncio
 frontend
 pymupdf
+git add requirements.txt
+git commit -m "Added pymupdf to requirements"
+git push origin main  # Change 'main' to your branch name if needed
